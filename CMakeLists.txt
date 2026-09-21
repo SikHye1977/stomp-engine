@@ -12,6 +12,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(stomp-dsp
     src/dsp/Gain.cpp
+    src/dsp/EffectChain.cpp
 )
 
 target_include_directories(stomp-dsp
@@ -56,4 +57,18 @@ target_link_libraries(gain-test
 add_test(
     NAME GainTest
     COMMAND gain-test
+)
+
+add_executable(effect-chain-test
+    tests/EffectChainTest.cpp
+)
+
+target_link_libraries(effect-chain-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME EffectChainTest
+    COMMAND effect-chain-test
 )
