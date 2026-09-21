@@ -86,3 +86,17 @@ add_test(
     NAME BypassTest
     COMMAND bypass-test
 )
+
+add_executable(parameter-test
+    tests/ParameterTest.cpp
+)
+
+target_link_libraries(parameter-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME ParameterTest
+    COMMAND parameter-test
+)

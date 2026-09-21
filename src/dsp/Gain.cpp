@@ -3,8 +3,15 @@
 namespace stomp::dsp {
 
 Gain::Gain(float gain)
-    : gain_(gain)
+    : gain_(
+        "gain",
+        "Gain",
+        0.0f,
+        2.0f,
+        1.0f
+    )
 {
+    gain_.setValue(gain);
 }
 
 void Gain::prepare(double, std::size_t)
@@ -18,22 +25,34 @@ void Gain::processBlock(
     std::size_t numFrames
 )
 {
+    const float gain = gain_.getValue();
+
     for (std::size_t i = 0; i < numFrames; ++i) {
-        output[i] = input[i] * gain_;
+        output[i] = input[i] * gain;
     }
 }
 
 void Gain::reset()
 {
-    // Gain은 현재 내부 상태를 가지지 않는다.
+    gain_.reset();
 }
 
 void Gain::setGain(float gain)
 {
-    gain_ = gain;
+    gain_.setValue(gain);
 }
 
 float Gain::getGain() const
+{
+    return gain_.getValue();
+}
+
+Parameter& Gain::getGainParameter()
+{
+    return gain_;
+}
+
+const Parameter& Gain::getGainParameter() const
 {
     return gain_;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stomp/dsp/Effect.hpp"
+#include "stomp/dsp/Parameter.hpp"
 
 namespace stomp::dsp {
 
@@ -15,6 +16,9 @@ public:
     void setGain(float gain);
     float getGain() const;
 
+    Parameter& getGainParameter();
+    const Parameter& getGainParameter() const;
+
 protected:
     void processBlock(
         const float* input,
@@ -23,7 +27,7 @@ protected:
     ) override;
 
 private:
-    float gain_;
+    Parameter gain_;
 };
 
 } // namespace stomp::dsp
