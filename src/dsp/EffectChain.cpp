@@ -8,13 +8,59 @@ namespace stomp::dsp {
 void EffectChain::addEffect(std::unique_ptr<Effect> effect)
 {
     if (!effect) {
-        throw std::invalid_argument("Effect cannot be null");
+        throw std::invalid_argument(
+            "Effect cannot be null"
+        );
+    }
+
+    for (const auto& existing : effects_) {
+        if (existing->getId() == effect->getId()) {
+            throw std::invalid_argument(
+                "Duplicate effect ID: " + effect->getId()
+            );
+        }
     }
 
     effects_.push_back(std::move(effect));
 }
 
-void EffectChain::prepare(double sampleRate, std::size_t blockSize)
+Effect& EffectChain::getEffect(const std::string& id)
+{
+    for (auto& effect : effects_) {
+        if (effect->getId() == id) {
+            return *effect;
+        }
+    }
+
+    throw std::out_of_range(
+        "Effect not found: " + id
+    );
+}
+
+const Effect& EffectChain::getEffect(
+    const std::string& id
+) const
+{
+    for (const auto& effect : effects_) {
+        if (effect->getId() == id) {
+            return *effect;
+        }
+    }
+
+    throw std::out_of_range(
+        "Effect not found: " + id
+    );
+}
+
+std::size_t EffectChain::getEffectCount() const
+{
+    return effects_.size();
+}
+
+void EffectChain::prepare(
+    double sampleRate,
+    std::size_t blockSize
+)
 {
     bufferA_.resize(blockSize);
     bufferB_.resize(blockSize);
@@ -37,7 +83,12 @@ void EffectChain::process(
     }
 
     if (effects_.empty()) {
-        std::copy(input, input + numFrames, output);
+        std::copy(
+            input,
+            input + numFrames,
+            output
+        );
+
         return;
     }
 
@@ -45,7 +96,9 @@ void EffectChain::process(
     float* currentOutput = bufferA_.data();
 
     for (std::size_t i = 0; i < effects_.size(); ++i) {
-        const bool isLast = (i == effects_.size() - 1);
+
+        const bool isLast =
+            (i == effects_.size() - 1);
 
         if (isLast) {
             currentOutput = output;
@@ -77,7 +130,7 @@ void EffectChain::reset()
 
 std::size_t EffectChain::size() const
 {
-    return effects_.size();
+    return getEffectCount();
 }
 
 } // namespace stomp::dsp

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace stomp::dsp {
@@ -11,6 +12,11 @@ namespace stomp::dsp {
 class EffectChain {
 public:
     void addEffect(std::unique_ptr<Effect> effect);
+
+    Effect& getEffect(const std::string& id);
+    const Effect& getEffect(const std::string& id) const;
+
+    std::size_t getEffectCount() const;
 
     void prepare(double sampleRate, std::size_t blockSize);
 
@@ -22,6 +28,7 @@ public:
 
     void reset();
 
+    // 기존 코드와의 호환성을 위해 유지한다.
     std::size_t size() const;
 
 private:

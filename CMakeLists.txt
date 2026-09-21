@@ -129,3 +129,17 @@ add_test(
     NAME OverdriveTest
     COMMAND overdrive-test
 )
+
+add_executable(effect-chain-control-test
+    tests/EffectChainControlTest.cpp
+)
+
+target_link_libraries(effect-chain-control-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME EffectChainControlTest
+    COMMAND effect-chain-control-test
+)
