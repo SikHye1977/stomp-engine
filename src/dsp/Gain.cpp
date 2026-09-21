@@ -3,13 +3,16 @@
 namespace stomp::dsp {
 
 Gain::Gain(float gain)
-    : gain_(
-        "gain",
-        "Gain",
-        0.0f,
-        2.0f,
-        1.0f
-    )
+    : Effect("gain", "Gain"),
+      gain_(
+          addParameter(
+              "gain",
+              "Gain",
+              0.0f,
+              2.0f,
+              1.0f
+          )
+      )
 {
     gain_.setValue(gain);
 }
@@ -34,7 +37,7 @@ void Gain::processBlock(
 
 void Gain::reset()
 {
-    gain_.reset();
+    Effect::reset();
 }
 
 void Gain::setGain(float gain)

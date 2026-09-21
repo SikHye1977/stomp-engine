@@ -100,3 +100,17 @@ add_test(
     NAME ParameterTest
     COMMAND parameter-test
 )
+
+add_executable(effect-parameter-test
+    tests/EffectParameterTest.cpp
+)
+
+target_link_libraries(effect-parameter-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME EffectParameterTest
+    COMMAND effect-parameter-test
+)

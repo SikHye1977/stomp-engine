@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stomp/dsp/Effect.hpp"
-#include "stomp/dsp/Parameter.hpp"
 
 namespace stomp::dsp {
 
@@ -27,7 +26,7 @@ protected:
     ) override;
 
 private:
-    Parameter gain_;
+    Parameter& gain_;
 };
 
 } // namespace stomp::dsp
