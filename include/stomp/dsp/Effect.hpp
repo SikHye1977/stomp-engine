@@ -3,10 +3,12 @@
 #include "stomp/dsp/Parameter.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace stomp::dsp {
@@ -18,17 +20,24 @@ public:
           name_(std::move(name))
     {
         if (id_.empty()) {
-            throw std::invalid_argument("Effect ID cannot be empty");
+            throw std::invalid_argument(
+                "Effect ID cannot be empty"
+            );
         }
 
         if (name_.empty()) {
-            throw std::invalid_argument("Effect name cannot be empty");
+            throw std::invalid_argument(
+                "Effect name cannot be empty"
+            );
         }
     }
 
     virtual ~Effect() = default;
 
-    virtual void prepare(double sampleRate, std::size_t blockSize) = 0;
+    virtual void prepare(
+        double sampleRate,
+        std::size_t blockSize
+    ) = 0;
 
     void process(
         const float* input,
@@ -36,12 +45,27 @@ public:
         std::size_t numFrames
     )
     {
-        if (bypassed_) {
-            std::copy(input, input + numFrames, output);
+        if (
+            bypassed_.load(
+                std::memory_order_relaxed
+            )
+        ) {
+            if (input != output) {
+                std::copy(
+                    input,
+                    input + numFrames,
+                    output
+                );
+            }
+
             return;
         }
 
-        processBlock(input, output, numFrames);
+        processBlock(
+            input,
+            output,
+            numFrames
+        );
     }
 
     virtual void reset()
@@ -51,22 +75,32 @@ public:
         }
     }
 
-    void setBypassed(bool bypassed)
+    void setBypassed(bool bypassed) noexcept
     {
-        bypassed_ = bypassed;
+        bypassed_.store(
+            bypassed,
+            std::memory_order_relaxed
+        );
     }
 
-    bool isBypassed() const
+    bool isBypassed() const noexcept
     {
-        return bypassed_;
+        return bypassed_.load(
+            std::memory_order_relaxed
+        );
     }
 
-    const std::string& getId() const
+    bool isBypassLockFree() const noexcept
+    {
+        return bypassed_.is_lock_free();
+    }
+
+    const std::string& getId() const noexcept
     {
         return id_;
     }
 
-    const std::string& getName() const
+    const std::string& getName() const noexcept
     {
         return name_;
     }
@@ -84,7 +118,9 @@ public:
         );
     }
 
-    const Parameter& getParameter(const std::string& id) const
+    const Parameter& getParameter(
+        const std::string& id
+    ) const
     {
         for (const auto& parameter : parameters_) {
             if (parameter->getId() == id) {
@@ -97,7 +133,7 @@ public:
         );
     }
 
-    std::size_t getParameterCount() const
+    std::size_t getParameterCount() const noexcept
     {
         return parameters_.size();
     }
@@ -119,17 +155,20 @@ protected:
             }
         }
 
-        auto parameter = std::make_unique<Parameter>(
-            std::move(id),
-            std::move(name),
-            minValue,
-            maxValue,
-            defaultValue
-        );
+        auto parameter =
+            std::make_unique<Parameter>(
+                std::move(id),
+                std::move(name),
+                minValue,
+                maxValue,
+                defaultValue
+            );
 
         Parameter& reference = *parameter;
 
-        parameters_.push_back(std::move(parameter));
+        parameters_.push_back(
+            std::move(parameter)
+        );
 
         return reference;
     }
@@ -144,9 +183,10 @@ private:
     std::string id_;
     std::string name_;
 
-    bool bypassed_ = false;
+    std::atomic<bool> bypassed_{false};
 
-    std::vector<std::unique_ptr<Parameter>> parameters_;
+    std::vector<std::unique_ptr<Parameter>>
+        parameters_;
 };
 
 } // namespace stomp::dsp

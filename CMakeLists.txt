@@ -143,3 +143,17 @@ add_test(
     NAME EffectChainControlTest
     COMMAND effect-chain-control-test
 )
+
+add_executable(real-time-safety-test
+    tests/RealTimeSafetyTest.cpp
+)
+
+target_link_libraries(real-time-safety-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME RealTimeSafetyTest
+    COMMAND real-time-safety-test
+)

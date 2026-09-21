@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -24,11 +25,15 @@ public:
           value_(defaultValue)
     {
         if (id_.empty()) {
-            throw std::invalid_argument("Parameter ID cannot be empty");
+            throw std::invalid_argument(
+                "Parameter ID cannot be empty"
+            );
         }
 
         if (name_.empty()) {
-            throw std::invalid_argument("Parameter name cannot be empty");
+            throw std::invalid_argument(
+                "Parameter name cannot be empty"
+            );
         }
 
         if (minValue_ > maxValue_) {
@@ -37,49 +42,65 @@ public:
             );
         }
 
-        if (defaultValue_ < minValue_ || defaultValue_ > maxValue_) {
+        if (
+            defaultValue_ < minValue_ ||
+            defaultValue_ > maxValue_
+        ) {
             throw std::invalid_argument(
                 "Parameter default value must be within range"
             );
         }
     }
 
-    void setValue(float value)
+    void setValue(float value) noexcept
     {
-        value_ = std::clamp(value, minValue_, maxValue_);
+        value_.store(
+            std::clamp(value, minValue_, maxValue_),
+            std::memory_order_relaxed
+        );
     }
 
-    float getValue() const
+    float getValue() const noexcept
     {
-        return value_;
+        return value_.load(
+            std::memory_order_relaxed
+        );
     }
 
-    void reset()
+    void reset() noexcept
     {
-        value_ = defaultValue_;
+        value_.store(
+            defaultValue_,
+            std::memory_order_relaxed
+        );
     }
 
-    const std::string& getId() const
+    bool isValueLockFree() const noexcept
+    {
+        return value_.is_lock_free();
+    }
+
+    const std::string& getId() const noexcept
     {
         return id_;
     }
 
-    const std::string& getName() const
+    const std::string& getName() const noexcept
     {
         return name_;
     }
 
-    float getMinValue() const
+    float getMinValue() const noexcept
     {
         return minValue_;
     }
 
-    float getMaxValue() const
+    float getMaxValue() const noexcept
     {
         return maxValue_;
     }
 
-    float getDefaultValue() const
+    float getDefaultValue() const noexcept
     {
         return defaultValue_;
     }
@@ -91,7 +112,8 @@ private:
     float minValue_;
     float maxValue_;
     float defaultValue_;
-    float value_;
+
+    std::atomic<float> value_;
 };
 
 } // namespace stomp::dsp

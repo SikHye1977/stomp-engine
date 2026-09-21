@@ -77,9 +77,15 @@ void EffectChain::process(
 )
 {
     if (numFrames > bufferA_.size()) {
-        throw std::runtime_error(
-            "EffectChain received a block larger than prepared block size"
-        );
+        if (input != output) {
+            std::copy(
+                input,
+                input + numFrames,
+                output
+            );
+        }
+
+        return;
     }
 
     if (effects_.empty()) {
