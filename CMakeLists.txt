@@ -72,3 +72,17 @@ add_test(
     NAME EffectChainTest
     COMMAND effect-chain-test
 )
+
+add_executable(bypass-test
+    tests/BypassTest.cpp
+)
+
+target_link_libraries(bypass-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME BypassTest
+    COMMAND bypass-test
+)

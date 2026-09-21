@@ -10,16 +10,17 @@ public:
 
     void prepare(double sampleRate, std::size_t blockSize) override;
 
-    void process(
-        const float* input,
-        float* output,
-        std::size_t numFrames
-    ) override;
-
     void reset() override;
 
     void setGain(float gain);
     float getGain() const;
+
+protected:
+    void processBlock(
+        const float* input,
+        float* output,
+        std::size_t numFrames
+    ) override;
 
 private:
     float gain_;

@@ -9,11 +9,10 @@ Gain::Gain(float gain)
 
 void Gain::prepare(double, std::size_t)
 {
-    // Gain은 현재 sample rate나 block size에
-    // 의존하지 않으므로 할 일이 없다.
+    // Gain은 sample rate나 block size에 의존하지 않는다.
 }
 
-void Gain::process(
+void Gain::processBlock(
     const float* input,
     float* output,
     std::size_t numFrames
@@ -26,7 +25,7 @@ void Gain::process(
 
 void Gain::reset()
 {
-    // Gain은 내부 상태를 가지지 않는다.
+    // Gain은 현재 내부 상태를 가지지 않는다.
 }
 
 void Gain::setGain(float gain)
