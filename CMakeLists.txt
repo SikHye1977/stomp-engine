@@ -13,6 +13,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(stomp-dsp
     src/dsp/Gain.cpp
     src/dsp/EffectChain.cpp
+    src/dsp/Overdrive.cpp
 )
 
 target_include_directories(stomp-dsp
@@ -113,4 +114,18 @@ target_link_libraries(effect-parameter-test
 add_test(
     NAME EffectParameterTest
     COMMAND effect-parameter-test
+)
+
+add_executable(overdrive-test
+    tests/OverdriveTest.cpp
+)
+
+target_link_libraries(overdrive-test
+    PRIVATE
+        stomp-dsp
+)
+
+add_test(
+    NAME OverdriveTest
+    COMMAND overdrive-test
 )
